@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LeetCode Focus Mode
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      1.0
 // @description  just focus!
 // @author       litt1e-p
 // @homepage     https://github.com/litt1e-p/tampermonkey/leetcode-focus-mode
@@ -12,7 +12,7 @@
 // @match        https://leetcode.com/problems/*
 // @match        https://leetcode.com/contest/*/problems/*
 // @grant        none
-// @run-at       document-end
+// @run-at       document-idle
 // ==/UserScript==
 (function(){
   function insertStyle() {
@@ -48,6 +48,19 @@
     if (!el) return;
     el.innerText = active ? 'hide' : 'show';
   }
+  function findNav() {
+      let rs;
+      const divs = [...document.querySelectorAll('div')];
+      for(let i = 0, l = divs.length; i < l; i++) {
+          const e = divs[i];
+          const m = Object.assign({}, e.dataset);         
+          if (m.hasOwnProperty('isLoading') && m.hasOwnProperty('status')) {
+              rs = e;
+              break;
+          }
+      }
+      return rs;
+  }
   function els () {
     var usNav = '#navbar-root';
     var cat = '.category-group-base';
@@ -60,7 +73,8 @@
       const el = document.querySelector(els[i]);
       if (el) rs.push(el);
     }
-    return rs;
+    const nav2 = findNav();
+    return nav2 ? rs.concat([nav2]) : rs;
   }
   function toggleEls(show = true) {
     var ls = els();
@@ -99,7 +113,9 @@
   function initState() {
     let s = savedState();
     if (s === null) return;
-    toggleState(+s);
+    window.onload = function(){
+        toggleState(+s)
+    };
   }
   function main() {
     insertStyle();
@@ -109,3 +125,7 @@
   }
   main();
 })();
+
+// https://www.tampermonkey.net/documentation.php
+// https://github.com/Tampermonkey/tampermonkey
+// https://greasyfork.org/en/scripts/415163-leetcode-focus-mode
